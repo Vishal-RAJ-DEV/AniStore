@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FaDollarSign, FaStar, FaHeart, FaBox } from 'react-icons/fa'
+import { FaDollarSign, FaStar, FaBox } from 'react-icons/fa'
+import HeartIcon from './HeartIcon'
 
 const SmallProducts = ({ product }) => {
   return (
@@ -31,10 +32,8 @@ const SmallProducts = ({ product }) => {
           </div>
         </div>
 
-        {/* Wishlist Icon - Shows on Hover */}
-        <button className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100 shadow-lg">
-          <FaHeart className="text-[#ff6b9d]" size={16} />
-        </button>
+        {/* Heart Icon - Using the HeartIcon component */}
+        <HeartIcon product={product} />
 
         {/* Stock Badge - Shows on Hover */}
         {product.countInStock !== undefined && (
@@ -58,16 +57,16 @@ const SmallProducts = ({ product }) => {
       </div>
 
       {/* Product Info - Outside Image */}
-      <div className=" flex justify-between items-center space-y-1">
+      <div className="flex justify-between space-y-1">
         {/* Product Name */}
         <h3 className="text-white font-semibold text-base line-clamp-2 group-hover:text-[#ff6b9d] transition-colors">
           {product.name}
         </h3>
 
         {/* Price */}
-        <div className="flex items-center">
-          <FaDollarSign className="text-[#ff6b9d] mr-1" size={14} />
-          <span className="text-white font-bold text-lg">
+        <div className="flex items-center bg-pink-950 text-[#ff6b9d] rounded-full px-1">
+          <FaDollarSign className=" mr-1" size={14} />
+          <span className=" font-bold mr-1">
             {product.price?.toFixed(2)}
           </span>
         </div>

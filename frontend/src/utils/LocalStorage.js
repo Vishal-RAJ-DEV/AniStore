@@ -11,6 +11,8 @@ export const removeFavoriteFromLocalStorage = (data) => {
     const updatedFavorites = favorites.filter((item) => item._id !== data._id);
     localStorage.setItem("favorites" , JSON.stringify(updatedFavorites));
 }
+
+
 export const getLocalStorageFavorites = () => {
     const favorites = localStorage.getItem("favorites");
     if(favorites){
