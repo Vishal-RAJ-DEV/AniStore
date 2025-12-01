@@ -17,6 +17,8 @@ import ProductList from './pages/Admin/ProductList.jsx'
 import AllProducts from './pages/Admin/AllProducts.jsx'
 import ProductUpdate from './pages/Admin/ProductUpdate.jsx'
 import Home from './pages/Home.jsx'
+import Favorites from './pages/Products/Favorites.jsx'
+import ProductDetails from './pages/Products/ProductDetails.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,6 +26,9 @@ const router = createBrowserRouter(
       <Route path='login' element={<Login />} />
       <Route path='register' element={<Register />} />
       <Route index={true} path='/' element={<Home />} />
+      <Route path='favorites' element={<Favorites />} />
+      <Route path='product/:id' element={<ProductDetails />} />
+
 
       {/* Register User  */}
       <Route path="" element={<PrivateRouter />}> //protecting the route if the user is logged in then only he can access the profile page 
