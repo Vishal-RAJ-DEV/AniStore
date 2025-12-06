@@ -15,6 +15,14 @@ const reviewSchema = new mongoose.Schema(
             type : String,
             required : true,
         },
+        title :{
+            type : String,
+            required : true,
+        },
+        email :{
+            type : String,
+            required : true,
+        },
         user : {
             type : mongoose.Schema.Types.ObjectId,// this will store the user id who wrote the review
             ref : "User", // reference to the User model

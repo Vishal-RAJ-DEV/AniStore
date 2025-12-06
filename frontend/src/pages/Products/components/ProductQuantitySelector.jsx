@@ -1,9 +1,6 @@
-import React, { useState } from 'react'
 import { FaMinus, FaPlus } from 'react-icons/fa'
 
-const ProductQuantitySelector = ({ product }) => {
-    const [qty, setQty] = useState(1)
-
+const ProductQuantitySelector = ({ product , qty , setQty }) => {
     return (
         <div className="space-y-3">
             <label className="text-white font-semibold text-lg">Quantity</label>

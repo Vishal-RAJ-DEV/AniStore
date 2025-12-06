@@ -8,6 +8,8 @@ import DescriptionAccordion from './DescriptionAccordion'
 import ProductMeta from './ProductMeta'
 
 const ProductInfo = ({ product }) => {
+
+    const [ qty , setQty ] = React.useState(1);
     return (
         <div className="flex flex-col space-y-6 lg:space-y-8">
             {/* Product Title */}
@@ -23,10 +25,10 @@ const ProductInfo = ({ product }) => {
             <ProductSizeSelector product={product} />
 
             {/* Quantity Selector */}
-            <ProductQuantitySelector product={product} />
+            <ProductQuantitySelector product={product} qty={qty} setQty={setQty} />
 
             {/* Add to Cart Section */}
-            <AddToCartSection product={product} />
+            <AddToCartSection product={product} qty={qty} />
 
             {/* Description Accordion */}
             <DescriptionAccordion product={product} />

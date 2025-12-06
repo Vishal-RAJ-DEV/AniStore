@@ -1,9 +1,18 @@
-import React from 'react'
 import { FaShoppingCart, FaHeart, FaShare } from 'react-icons/fa'
+import { useDispatch } from 'react-redux'
+import { addTOCart } from '../../../redux/features/cart/cartSlice'
+import { toast } from 'react-toastify'
 
-const AddToCartSection = ({ product }) => {
+const AddToCartSection = ({ product  , qty }) => {
+    const dispatch = useDispatch();
     const addToCartHandler = () => {
         // TODO: Redux logic
+        dispatch(addTOCart({
+            ...product,
+            qty: qty
+        }))
+        toast.success(`"${product.name}" added to cart`);
+
         console.log('Add to cart')
     }
 
