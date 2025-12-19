@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    catogories : [],
-    product : [],
+    categories : [],
+    products : [],
     checked : [],
     brands : [],
     radio : [],
@@ -15,10 +15,10 @@ const shopSlice = createSlice({
     initialState,
     reducers :{
         setCategories : ( state , action) =>{
-            state.catogories = action.payload;
+            state.categories = action.payload;
         },
         setProducts : ( state , action ) =>{
-            state.product = action.payload;
+            state.products = action.payload;
         },
         setChecked: ( state , action) =>{
             state.checked = action.payload;
