@@ -1,22 +1,41 @@
 import { FaShoppingCart, FaHeart, FaShare } from 'react-icons/fa'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { addTOCart } from '../../../redux/features/cart/cartSlice'
 import { toast } from 'react-toastify'
 
 const AddToCartSection = ({ product  , qty }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { userInfo } = useSelector((state) => state.auth);
+    
     const addToCartHandler = () => {
-        // TODO: Redux logic
+        // Check if user is logged in
+        if (!userInfo) {
+            toast.error('Please login to add items to cart');
+            // Redirect to login page with current path as redirect parameter
+            navigate(`/login?redirect=${location.pathname}`);
+            return;
+        }
+
+        // Add to cart if user is authenticated
         dispatch(addTOCart({
             ...product,
-            qty: qty
+            qty: qty,
+            userId: userInfo._id
         }))
         toast.success(`"${product.name}" added to cart`);
-
-        console.log('Add to cart')
     }
 
     const buyNowHandler = () => {
+        // Check if user is logged in for buy now as well
+        if (!userInfo) {
+            toast.error('Please login to proceed with purchase');
+            navigate(`/login?redirect=${location.pathname}`);
+            return;
+        }
+        
         // TODO: Redux + Navigation logic
         console.log('Buy now')
     }

@@ -2,7 +2,7 @@ import { useSelector, useDispatch } from "react-redux"
 import {
   addToFavorites,
   removeFromFavorites,
-  setFavorites
+  loadUserFavorites
 } from "../../redux/features/favorites/favoriteSlice"
 import {
   getLocalStorageFavorites,
@@ -12,31 +12,43 @@ import {
 import { useEffect, useState } from "react"
 import { FaHeart, FaRegHeart } from "react-icons/fa"
 import { toast } from 'react-toastify'
+import { useNavigate, useLocation } from "react-router-dom"
 
 const HeartIcon = ({ product }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const Favorites = useSelector((state) => state.favorites) || [];
+  const { userInfo } = useSelector((state) => state.auth);
   const isFavorite = Favorites.find((items) => items._id === product._id);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    // On component mount, load favorites from local storage
-    const localFavorites = getLocalStorageFavorites();
-    dispatch(setFavorites(localFavorites));
-  }, [dispatch])
+    // Load user-specific favorites when component mounts or user changes
+    if (userInfo) {
+      dispatch(loadUserFavorites(userInfo._id));
+    }
+  }, [dispatch, userInfo])
 
   const toggleFavoriteButton = () => {
+    // Check if user is logged in
+    if (!userInfo) {
+      toast.error('Please login to add items to favorites');
+      navigate(`/login?redirect=${location.pathname}`);
+      return;
+    }
+
     // Trigger animation
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
 
     if (isFavorite) {
-      dispatch(removeFromFavorites(product));
-      removeFavoriteFromLocalStorage(product);
+      dispatch(removeFromFavorites({ ...product, userId: userInfo._id }));
+      removeFavoriteFromLocalStorage(product, userInfo._id);
       toast.info("Removed from favorites");
     } else {
-      dispatch(addToFavorites(product));
-      addFavotiteToLocalStorage(product);
+      dispatch(addToFavorites({ ...product, userId: userInfo._id }));
+      addFavotiteToLocalStorage(product, userInfo._id);
       toast.success("Added to favorites");
     }
   }

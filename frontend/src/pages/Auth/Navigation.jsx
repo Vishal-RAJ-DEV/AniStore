@@ -20,6 +20,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLogoutMutation } from '../../redux/api/userApiSlice'
 import { logout } from '../../redux/features/auth/authslice'
+import { clearCartOnLogout } from '../../redux/features/cart/cartSlice'
+import { clearFavoritesOnLogout } from '../../redux/features/favorites/favoriteSlice'
 import FavoritesCount from '../Products/FavoritesCount'
 
 const Navigation = () => {
@@ -48,6 +50,11 @@ const Navigation = () => {
     const logoutHandler = async () => {
         try {
             await logoutApiCall().unwrap();
+            // Save cart and favorites before logout
+            if (userInfo) {
+                dispatch(clearCartOnLogout(userInfo._id));
+                dispatch(clearFavoritesOnLogout(userInfo._id));
+            }
             dispatch(logout());
             navigate('/login');
             setDropdownOpen(false);
@@ -55,6 +62,7 @@ const Navigation = () => {
             console.error(error)
         }
     }
+ 
 
     // Close dropdown when clicking outside
     useEffect(() => {

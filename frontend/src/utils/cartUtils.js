@@ -21,9 +21,9 @@ const updateCart = (state) => {
         Number(state.taxPrice)
     ).toFixed(2) // Fixed: Added missing closing parenthesis
 
-    //save to local storage - save the entire state, not just cartItems so that other details like itemsPrice are also preserved
-    localStorage.setItem("cartItems", JSON.stringify(state));
-
+    // Note: localStorage saving is now handled in the cartSlice with user-specific keys
+    // No longer saving here to allow for user-specific cart storage
+    
     return state;
 }
 

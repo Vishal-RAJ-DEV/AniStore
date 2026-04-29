@@ -1,9 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { updateCart } from "../../../utils/cartUtils";
 
-const getInitialState = () => {
+const getInitialStateForUser = (userId) => {
+    if (!userId) {
+        // If no user is logged in, return empty cart
+        return {
+            cartItems: [],
+            itemsPrice: 0,
+            shippingPrice: 0,
+            taxPrice: 0,
+            shippingAddress: {},
+            paymentMethod: 'PayPal',
+            totalPrice: 0,
+        };
+    }
+
     try {
-        const storedData = localStorage.getItem("cartItems");
+        const storedData = localStorage.getItem(`cartItems_${userId}`);
         if (storedData) {
             const parsed = JSON.parse(storedData);
             
@@ -48,14 +61,23 @@ const getInitialState = () => {
     };
 };
 
-const initialState = getInitialState();
+// Initialize with empty cart (will be loaded when user logs in)
+const initialState = {
+    cartItems: [],
+    itemsPrice: 0,
+    shippingPrice: 0,
+    taxPrice: 0,
+    shippingAddress: {},
+    paymentMethod: 'PayPal',
+    totalPrice: 0,
+};
 
 const cartSlice = createSlice({
     name : 'cart',
     initialState,
     reducers :{
         addTOCart : (state , action) =>{
-            const { user , rating , numReview , ...items} = action.payload; 
+            const { user , rating , numReview , userId, ...items} = action.payload; 
             
             const existItems = state.cartItems.find( (x) => x._id === items._id );
 
@@ -68,8 +90,12 @@ const cartSlice = createSlice({
                 state.cartItems.push(items);
             }
 
-            //update cart
-            return updateCart(state , items);
+            //update cart and save to user-specific storage
+            const updatedState = updateCart(state , items);
+            if (userId) {
+                localStorage.setItem(`cartItems_${userId}`, JSON.stringify(updatedState));
+            }
+            return updatedState;
         },
 
         removeCart : ( state , action ) =>{
@@ -79,25 +105,62 @@ const cartSlice = createSlice({
                 state.cartItems.splice(itemIndex, 1);
             }
 
-            //update cart
-            return updateCart(state);
+            //update cart and save to user-specific storage
+            const updatedState = updateCart(state);
+            const userId = action.payload.userId;
+            if (userId) {
+                localStorage.setItem(`cartItems_${userId}`, JSON.stringify(updatedState));
+            }
+            return updatedState;
         },
 
         saveShippingAddress : ( state , action ) =>{
-            state.shippingAddress = action.payload;
-            localStorage.setItem( "cartItems" , JSON.stringify(state) );
+            state.shippingAddress = action.payload.address;
+            const userId = action.payload.userId;
+            if (userId) {
+                localStorage.setItem(`cartItems_${userId}`, JSON.stringify(state));
+            }
         },
         savePaymentMethod : ( state , action ) =>{
-            state.paymentMethod = action.payload;
-            localStorage.setItem( "cartItems" , JSON.stringify(state) );
+            state.paymentMethod = action.payload.method;
+            const userId = action.payload.userId;
+            if (userId) {
+                localStorage.setItem(`cartItems_${userId}`, JSON.stringify(state));
+            }
         },
 
-        clearCartItems : ( state ) =>{
+        loadUserCart: (state, action) => {
+            const userId = action.payload;
+            const userCart = getInitialStateForUser(userId);
+            return userCart;
+        },
+
+        clearCartOnLogout: (state, action) => {
+            // Save current cart to user-specific localStorage before clearing state
+            const userId = action.payload;
+            if (userId && state.cartItems.length > 0) {
+                localStorage.setItem(`cartItems_${userId}`, JSON.stringify(state));
+            }
+            
+            // Clear the Redux state (but preserve data in localStorage for logged-in users)
+            state.cartItems = [];
+            state.itemsPrice = 0;
+            state.shippingPrice = 0;
+            state.taxPrice = 0;
+            state.totalPrice = 0;
+            state.shippingAddress = {};
+            state.paymentMethod = 'PayPal';
+        },
+
+        clearCartItems : ( state , action ) =>{
             state.cartItems.splice(0);
-            localStorage.setItem("cartItems", JSON.stringify(state));
+            const userId = action.payload?.userId;
+            if (userId) {
+                localStorage.setItem(`cartItems_${userId}`, JSON.stringify(state));
+            }
         },
 
-        resetCart : ( state ) =>{
+        resetCart : ( state , action ) =>{
             state.cartItems.splice(0);
             state.itemsPrice = 0;
             state.shippingPrice = 0;
@@ -105,7 +168,10 @@ const cartSlice = createSlice({
             state.totalPrice = 0;
             state.shippingAddress = {};
             state.paymentMethod = 'PayPal';
-            localStorage.setItem("cartItems", JSON.stringify(state));
+            const userId = action.payload?.userId;
+            if (userId) {
+                localStorage.setItem(`cartItems_${userId}`, JSON.stringify(state));
+            }
         }
     }
 
@@ -117,7 +183,9 @@ export const {
     saveShippingAddress,
     savePaymentMethod,
     clearCartItems,
-    resetCart
+    resetCart,
+    loadUserCart,
+    clearCartOnLogout
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

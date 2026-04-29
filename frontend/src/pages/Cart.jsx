@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { addTOCart, removeCart } from '../redux/features/cart/cartSlice'
+import { addTOCart, removeCart, loadUserCart, clearCartOnLogout } from '../redux/features/cart/cartSlice'
 import { FaPlus, FaMinus, FaTimes, FaCheck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 
@@ -9,28 +9,67 @@ const Cart = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const { cartItems, itemsPrice, shippingPrice, taxPrice, totalPrice } = useSelector((state) => state.cart)
+    const { userInfo } = useSelector((state) => state.auth)
+
+    // Load user cart when authenticated
+    useEffect(() => {
+        if (userInfo) {
+            // Load user-specific cart data from localStorage
+            dispatch(loadUserCart(userInfo._id));
+        }
+    }, [userInfo, dispatch])
+
+    // If user is not authenticated, show login message
+    if (!userInfo) {
+        return (
+            <div className="min-h-screen bg-black pt-24 pb-12">
+                <div className="container mx-auto px-4">
+                    <div className="text-center py-16">
+                        <h2 className="text-4xl font-bold text-white mb-4">Please Login to View Your Cart</h2>
+                        <p className="text-gray-400 mb-8">You need to be logged in to access your shopping cart</p>
+                        <button
+                            onClick={() => navigate('/login?redirect=/cart')}
+                            className="bg-gradient-to-r from-[#ff6b9d] to-[#ff8da8] text-white px-8 py-3 rounded-full font-semibold hover:from-[#ff5c92] hover:to-[#ff7a99] transition-all mr-4"
+                        >
+                            Login
+                        </button>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="bg-gray-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-600 transition-all"
+                        >
+                            Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     const addToCartHandler = (product, qty) => {
-        if (qty > 0) {
+        if (qty > 0 && userInfo) {
             dispatch(addTOCart({
                 ...product,
-                qty: 1 // Add 1 to current quantity
+                qty: 1, // Add 1 to current quantity
+                userId: userInfo._id
             }))
         }
     }
 
     const decreaseQtyHandler = (product) => {
-        if (product.qty > 1) {
+        if (product.qty > 1 && userInfo) {
             dispatch(addTOCart({
                 ...product,
-                qty: -1 // Subtract 1 from current quantity
+                qty: -1, // Subtract 1 from current quantity
+                userId: userInfo._id
             }))
         }
     }
 
     const removeFromCartHandler = (id) => {
-        dispatch(removeCart({ _id: id }))
-        toast.success('Item removed from cart')
+        if (userInfo) {
+            dispatch(removeCart({ _id: id, userId: userInfo._id }))
+            toast.success('Item removed from cart')
+        }
     }
 
     const checkoutHandler = () => {

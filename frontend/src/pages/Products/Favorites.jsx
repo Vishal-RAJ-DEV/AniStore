@@ -1,11 +1,59 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { loadUserFavorites, clearFavoritesOnLogout } from '../../redux/features/favorites/favoriteSlice'
 import SmallProducts from './SmallProducts'
 import { Link } from 'react-router-dom'
 import { FaHeart, FaShoppingBag } from 'react-icons/fa'
 
 const Favorites = () => {
-  const favorites = useSelector((state) => state.favorites) || []
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const favorites = useSelector((state) => state.favorites) || [];
+  const { userInfo } = useSelector((state) => state.auth);
+
+  // Load user favorites when authenticated
+  useEffect(() => {
+    if (userInfo) {
+      // Load user-specific favorites from localStorage
+      dispatch(loadUserFavorites(userInfo._id));
+    }
+  }, [userInfo, dispatch]);
+
+  // If user is not authenticated, show login message
+  if (!userInfo) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-black to-[#0a0a0a]">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-20">
+            <div className="bg-[#1e1e1e] border border-[#333] rounded-2xl p-12 max-w-md mx-auto">
+              <div className="bg-gradient-to-r from-[#ff6b9d]/20 to-[#ff8da8]/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaHeart className="text-[#ff6b9d] text-5xl" />
+              </div>
+              <h3 className="text-2xl font-semibold text-white mb-3">
+                Please Login to View Your Favorites
+              </h3>
+              <p className="text-gray-400 mb-8">
+                You need to be logged in to access your wishlist
+              </p>
+              <button
+                onClick={() => navigate('/login?redirect=/favorites')}
+                className="bg-gradient-to-r from-[#ff6b9d] to-[#ff8da8] text-white px-8 py-3 rounded-full font-semibold hover:from-[#ff5c92] hover:to-[#ff7a99] transition-all mr-4"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="bg-gray-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-600 transition-all"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-[#0a0a0a]">

@@ -7,6 +7,9 @@ import userRoutes from "./routes/userRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import ordersRoutes from "./routes/ordersRoutes.js";
+import cors from "cors";
+
 
 
 //utils
@@ -24,12 +27,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// Enable CORS for all routes (you can configure this further for specific origins)
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Replace with your frontend URL
+    credentials: true, // Allow cookies to be sent with requests
+}));
 
 //routes 
 app.use("/api/users", userRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/uploads" , uploadRoutes);
+app.use("/api/orders", ordersRoutes);
+
+//this will send the paypal client id to the frontend so that it can be used to make payments
+app.use( "/api/config/paypal" , ( req , res) => {
+    res.send({ clientId : process.env.PAYPAL_CLIENT_ID});
+})
 
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

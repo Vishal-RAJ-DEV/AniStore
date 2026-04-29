@@ -17,7 +17,9 @@ const authSlice = createSlice({
         },
         logout: (state) => {
             state.userInfo = null;
-            localStorage.clear();
+            // Only remove auth-related items, keep cart and favorites data
+            localStorage.removeItem('userInfo');
+            localStorage.removeItem('expirationTime');
         }
     }
 });
