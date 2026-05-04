@@ -7,6 +7,7 @@ import { BASE_URL } from "../constant"
 // This sets up the foundation for all API calls with the base URL
 const baseQuery = fetchBaseQuery({
     baseUrl: BASE_URL, // The root URL for all API requests
+    credentials: 'include', // Ensure cookies are sent with requests
 })
 
 // Creating the API slice using createApi

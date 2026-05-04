@@ -1,6 +1,6 @@
 import { apiSlice } from "./apiSlice"
 import { ORDER_URL , PAYPAL_URL } from "../constant"
-``
+
 const orderApiSlice  = apiSlice.injectEndpoints({
     endpoints : ( builder ) =>({
         createOrder : builder.mutation({
@@ -8,31 +8,51 @@ const orderApiSlice  = apiSlice.injectEndpoints({
                 url : ORDER_URL,
                 method : "POST",
                 body : data
-            })
+            }),
+            invalidatesTags : ['Orders']
         }),
-        getOrderById : builder.query({
-            query : ( orderId) =>({
+        getOrderDetails : builder.query({
+            query : (orderId) =>({
                 url : `${ORDER_URL}/${orderId}`,
                 method : "GET"
-            })
+            }),
+            providesTags : (result, error, orderId) => [{ type: 'Orders', id: orderId }]
         }),
-        getallorders : builder.query  ({
-            query : () =>({
-                url : ORDER_URL,
-                method : "GET"
-            })
+        payOrder : builder.mutation({
+            query : ({ orderId, details }) =>({
+                url : `${ORDER_URL}/${orderId}/pay`,
+                method : "PUT",
+                body : details
+            }),
+            invalidatesTags : (result, error, { orderId }) => [{ type: 'Orders', id: orderId }]
         }),
-        getuserOrder : builder.query({
+        getMyOrders : builder.query({
             query : () =>({
                 url : `${ORDER_URL}/mine`,
                 method : "GET"
-            })
+            }),
+            providesTags : ['Orders']
         }),
-        getOrderById : builder.query({
-            query : ( userId) =>({
-                url : `${ORDER_URL}/${userId}`,
+        getOrders : builder.query({
+            query : () =>({
+                url : ORDER_URL,
                 method : "GET"
-            })
+            }),
+            providesTags : ['Orders']
+        }),
+        deliverOrder : builder.mutation({
+            query : (orderId) =>({
+                url : `${ORDER_URL}/${orderId}/deliver`,
+                method : "PUT",
+            }),
+            invalidatesTags : (result, error, orderId) => [{ type: 'Orders', id: orderId }]
+        }),
+        cancelOrder : builder.mutation({
+            query : (orderId) =>({
+                url : `${ORDER_URL}/${orderId}/cancel`,
+                method : "DELETE",
+            }),
+            invalidatesTags : (result, error, orderId) => [{ type: 'Orders', id: orderId }]
         }),
         totalorders : builder.query({
             query : () =>({
@@ -52,19 +72,6 @@ const orderApiSlice  = apiSlice.injectEndpoints({
                 method : "GET"
             })
         }),
-        makeorderAsPaid : builder.mutation({
-            query : ({ id , paymentResult }) =>({
-                url : `${ORDER_URL}/${id}/pay`,
-                method : "PUT",
-                body : paymentResult
-            })
-        }),
-        makeorderAsDelivered : builder.mutation({
-            query : (id) =>({
-                url : `${ORDER_URL}/${id}/deliver`,
-                method : "PUT",
-            })
-        }),
         getpaypalclientId : builder.query({
             query : () =>({
                 url : `${PAYPAL_URL}`,
@@ -76,12 +83,14 @@ const orderApiSlice  = apiSlice.injectEndpoints({
 
 export const {
     useCreateOrderMutation,
-    useGetOrderByIdQuery,
-    useGetallordersQuery,
-    useGetuserOrderQuery,
+    useGetOrderDetailsQuery,
+    usePayOrderMutation,
+    useGetMyOrdersQuery,
+    useGetOrdersQuery,
+    useDeliverOrderMutation,
+    useCancelOrderMutation,
     useTotalordersQuery,
     useTotalsalesQuery,
     useTotalsalesbydateQuery,
-    useMakeorderAsPaidMutation,
-    useMakeorderAsDeliveredMutation
+    useGetpaypalclientIdQuery
 } = orderApiSlice;

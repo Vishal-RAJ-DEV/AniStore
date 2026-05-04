@@ -6,6 +6,7 @@ import { Provider } from 'react-redux'
 import store from './redux/store.js'
 import { Route, RouterProvider, createRoutesFromElements } from 'react-router'
 import { createBrowserRouter } from 'react-router-dom'
+import { PayPalScriptProvider } from '@paypal/react-paypal-js'
 import Login from './pages/Auth/Login.jsx'
 import Register from './pages/Auth/Register.jsx'
 import PrivateRouter from './components/PrivateRouter.jsx'
@@ -62,6 +63,8 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
-    <RouterProvider router={router} />
+    <PayPalScriptProvider deferLoading={true}>
+      <RouterProvider router={router} />
+    </PayPalScriptProvider>
   </Provider>
 )
