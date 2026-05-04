@@ -23,7 +23,7 @@ import Cart from './pages/Cart.jsx'
 import Shop from './pages/Shop.jsx'
 import Shipping from './pages/orders/Shipping.jsx'
 import PlaceOrder from './pages/orders/PlaceOrder.jsx'
-import Order from './pages/orders/order.jsx'
+import Order from './pages/orders/Order.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(

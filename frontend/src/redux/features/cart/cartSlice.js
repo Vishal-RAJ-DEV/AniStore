@@ -1,6 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { updateCart } from "../../../utils/cartUtils";
 
+const getPersistUserId = (payloadUserId) => {
+    if (payloadUserId) return payloadUserId;
+
+    try {
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) return null;
+
+        const parsedUserInfo = JSON.parse(userInfo);
+        return parsedUserInfo?._id || null;
+    } catch (error) {
+        console.error('Error reading user info from localStorage:', error);
+        return null;
+    }
+};
+
 const getInitialStateForUser = (userId) => {
     if (!userId) {
         // If no user is logged in, return empty cart
@@ -115,15 +130,15 @@ const cartSlice = createSlice({
         },
 
         saveShippingAddress : ( state , action ) =>{
-            state.shippingAddress = action.payload.address;
-            const userId = action.payload.userId;
+            state.shippingAddress = action.payload;
+            const userId = getPersistUserId(action.payload.userId);
             if (userId) {
                 localStorage.setItem(`cartItems_${userId}`, JSON.stringify(state));
             }
         },
         savePaymentMethod : ( state , action ) =>{
-            state.paymentMethod = action.payload.method;
-            const userId = action.payload.userId;
+            state.paymentMethod = action.payload;
+            const userId = getPersistUserId();
             if (userId) {
                 localStorage.setItem(`cartItems_${userId}`, JSON.stringify(state));
             }

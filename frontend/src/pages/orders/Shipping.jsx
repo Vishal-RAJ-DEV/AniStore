@@ -18,9 +18,17 @@ const Shipping = () => {
     const [postalCode, setPostalCode] = useState(shippingAddress.postalCode || '')
     const [country, setCountry] = useState(shippingAddress.country || '')
     const [paymentMethod, setPaymentMethod] = useState('PayPal')
+    const [formError, setFormError] = useState('')
 
     const submitHandler = (e) => {
         e.preventDefault()
+
+        if (!address.trim() || !city.trim() || !postalCode.trim() || !country.trim()) {
+            setFormError('Please fill in all shipping fields.')
+            return
+        }
+
+        setFormError('')
         dispatch(saveShippingAddress({ address, city, postalCode, country }))
         dispatch(savePaymentMethod(paymentMethod))
         navigate('/placeorder')
@@ -36,6 +44,12 @@ const Shipping = () => {
                     <div className="px-6 py-8 md:px-10 md:py-10">
                         <h1 className="text-3xl font-bold text-white mb-2">Shipping Details</h1>
                         <p className="text-gray-400 mb-8">Please enter your shipping and payment information.</p>
+
+                        {formError && (
+                            <div className="mb-6 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                                {formError}
+                            </div>
+                        )}
                         
                         <form onSubmit={submitHandler} className="space-y-6">
                             {/* Address Fields */}

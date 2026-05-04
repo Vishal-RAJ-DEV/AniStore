@@ -32,36 +32,39 @@ const createOrder = async (req, res) => {
 
         //here we are finding the product form the database which is sends by form the client so that we can get the actual price from the database
         //this is for security purpose so that user cannot manipulate the price from the client side
-        const itemFormDB = Product.find({
+        const itemsFromDB = await Product.find({
             _id : {
                 $in : orderItems.map((item) => item._id)
             }
-        })
+        });
 
         //now we will rebuild the order items with the actual price from the databas
         const DBorderItems = orderItems.map((itemsFromClient)=>{
-            const finalMatchingItems = itemFormDB.find((itemsFromDB) => itemsFromDB._id.toString() === itemsFromClient._id.toString());
+            const finalMatchingItems = itemsFromDB.find((itemFromDB) => itemFromDB._id.toString() === itemsFromClient._id.toString());
 
             if( !finalMatchingItems ){
-                throw new Error(`Product with id ${itemsFromClient._id} not found`);
+                res.status(404);
+                throw new Error(`Product not found: ${itemsFromClient._id}`);
             }
 
             return {
-                ...itemsFromClient, //this will contain name , qty , image
+                ...itemsFromClient, //this will contain qty and any other client-side display fields
+                name : finalMatchingItems.name,
                 product : finalMatchingItems._id,
                 price : finalMatchingItems.price,
                 _id : undefined //we don't need _id in the order items
             };
         });
 
-        const { itemPrice, shippingPrice, taxPrice, totalPrice } = calcPrice(DBorderItems);
+        const itemsPrice = DBorderItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
+        const { shippingPrice, taxPrice, totalPrice } = calcPrice(DBorderItems);
 
         const order = new Order({
             user : req.user._id,
             orderItems : DBorderItems,
             shippingAddress,
             paymentMethod,
-            itemPrice,
+            itemPrice : itemsPrice.toFixed(2),
             shippingPrice,
             taxPrice,
             totalPrice
@@ -227,7 +230,7 @@ const cancelOrder = async ( req , res) => {
         if(order.isPaid){
             return res.status(400).json({ message: "Cannot cancel a paid order" });
         }
-        await order.remove();
+        await Order.deleteOne({ _id: order._id });
         res.status(200).json({ message: "Order cancelled successfully" });
     } catch (error) {
         res.status(500).json({
